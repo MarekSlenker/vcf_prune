@@ -32,7 +32,8 @@ The VCF_prune.py args are:
   -s             subsample polyploid data to create psuedo-diploid data
   -gz            use if vcfs are gzipped
 ```
-This script reads each SNP and evaluates if it passed the desired threshold (seted by arguments `-m`, `-minf`, and `-maxf`). If it does, the SNP is recorded. It records each SNP passing threshold within a single window, whose width is set by `-w` argument. When passing window border, script randomly selects a single SNP for STRUCTURE file. Searching for SNPs continues in next window. Distance in between two windows is seted by `-d` argument.
+This script reads each SNP and evaluates if it passed the desired threshold (seted by arguments `-m`, `-minf`, and `-maxf`). If it does, the SNP is recorded. It records each SNP passing threshold within a single window, whose width is set by `-w` argument. When passing the window border, the script randomly selects a single SNP for the STRUCTURE file. Searching for SNPs continues in the next window. Distance in between two windows is set by `-d` argument.
+
 
 POPDATA
 
