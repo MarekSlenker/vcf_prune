@@ -9,7 +9,7 @@ This script works by walking along the chromosome in each input vcf file. It the
 
 ## Usage
 **Dependencies**: numpy, scipy, and transposer  
-To see the required arguments for this script, type `python2.7 VCF_prune.py` into the command line.  
+To see the required arguments for this script, type `python2 VCF_prune.py` into the command line.  
 
 ```
 VCF_prune.py [<args>]
@@ -44,3 +44,8 @@ PLOIDY: `VCF_prune.py` works with mixed ploidy vcf files. Set highest ploidy by 
 `-s` creates pseudo-diploid (‘diploidized’) data. This is required for fastStructure, as fastStructure can only handle diploid data. So, if you are running tetraploid or mixed_ploidy datasets, you will need to specify that you want diploidized data. 
 
 
+## Examples
+To run `VCF_prune.py` with test_data, execute the following command:
+```
+python2 VCF_prune.py -v test_data -w 100 -r 2 -d 0 -m 0.4 -minf 0.05 -maxf 0.95 -p 5 -n 4 -o test_data_pruned -s 
+```
