@@ -50,3 +50,11 @@ To run `VCF_prune.py` with test_data, execute the following command:
 python2 VCF_prune.py -v test_data -w 100 -d 0 -m 0.4 -minf 0.05 -maxf 0.95 -p 5 -n 4 -o test -s
 ```
 results will appear in test_data directory.
+
+&nbsp;  
+### How to cite
+**Use the following formula:** ... vcf files were pruned using the vcf_prune.py script available at https://github.com/MarekSlenker/vcf_prune.  
+
+&nbsp;  
+### Other questions not covered here and reporting problems
+If you have a question or you encounter a problem, please see [issues](https://github.com/MarekSlenker/vcf_prune/issues) and feel free to ask any question. The authors will do their best to help you.
