@@ -40,7 +40,7 @@ where underscore character delimits population name and individual name. In this
 
 PLOIDY: `VCF_prune.py` works with mixed ploidy vcf files. Set highest ploidy by `-n` argument, and the absence of an allele (e.g.,  if ploidy is 4, diploids has 2 alleles absenting ) will be coded as -9 in the resulted STRUCTURE file. 
 
-`-r` stands for the number of randomly replicated pruned datasets you want to create. 
+`-r` stands for the number of randomly replicated pruned datasets you want to create.  
 `-s` creates pseudo-diploid (‘diploidized’) data. This is required for fastStructure, as fastStructure can only handle diploid data. So, if you are running tetraploid or mixed_ploidy datasets, you will need to specify that you want diploidized data. 
 
 
