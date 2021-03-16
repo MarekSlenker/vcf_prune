@@ -49,7 +49,7 @@ To run `VCF_prune.py` with test_data, execute the following command:
 ```
 python2 VCF_prune.py -v test_data -w 100 -d 0 -m 0.4 -minf 0.05 -maxf 0.95 -p 5 -n 4 -o test -s
 ```
-results will appear in test_data directory.
+results will appear in test_data directory. The resulted structure files are ready to run.  
 
 &nbsp;  
 ### How to cite
