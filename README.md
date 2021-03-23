@@ -1,6 +1,6 @@
 # VCF_prune
 
-This code was created in collaboration with [Jordan Koch](https://github.com/jmkoch)
+This code was created in collaboration with [Jordan Koch](https://github.com/jmkoch) and [Patrick Monnahan](https://github.com/pmonnahan)
  
 ## Description
 `VCF_prune.py` is a python2 script that takes **multi-sample (any ploidy or a mix of ploidies) vcf files as input**, and outputs files that are formatted for use in **STRUCTURE**.  
