@@ -22,6 +22,7 @@ The VCF_prune.py args are:
 
   -s             subsample polyploid data to create psuedo-diploid data
   -gz            use if vcfs are gzipped
+  -vcf           use if you want to print also pruned VCF files
 ''')
 parser.add_argument('-v', type = str, metavar = 'vcf_path', required = True, help = 'path to vcfs')
 parser.add_argument('-w', type = int, metavar = 'Window_Size', required = True, help = 'size of scaffold window')
@@ -35,6 +36,7 @@ parser.add_argument('-p', type = int, metavar = 'PopFlag_Length', required = Tru
 parser.add_argument('-n', type=int, metavar='Ploidy', required = True, help='ploidy of Structure file')
 parser.add_argument('-s',  action="store_true", help = 'if true, this will subsample polyploid data to create psuedo-diploid data')
 parser.add_argument('-gz', action="store_true", help='are vcfs gzipped (true) or not (false)')
+parser.add_argument('-vcf', action="store_true", help='if used, pruned VCF files will be printed')
 
 
 #output population as 2nd column (must be integer for STRUCTURE*)
@@ -68,7 +70,6 @@ def TestSnpQuality():
     missingData = sum(map(lambda x : x[0] == '.', currentAlleles))
                                                                         # Missing_Data            # min. ALT allele frequency     # MAX. ALT allele frequency     # min. ALT allele frequency           # MAX. ALT allele frequency
     result = cols[6] == 'PASS' and (float(missingData) / len(currentAlleles)) < float(args.m) and AC / AN >= float(args.minf) and AC / AN <= float(args.maxf) and (AN-AC) / AN >= float(args.minf) and (AN-AC) / AN <= float(args.maxf)    
-    float(missingData) / len(currentAlleles)
     return result
 
 
@@ -117,7 +118,8 @@ def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
         subtempfile.write('\t'.join(str(item) for item in dgenos))
         subtempfile.write("\n")
 
-    newVCF.write(current_lines[rx])
+    if args.vcf:
+        newVCF.write(current_lines[rx])
 
     current_window, current_lines = [], []
     return current_window, current_lines, vcf_sites
@@ -152,10 +154,12 @@ for rep in range(int(args.r)):
     for iii,vcf in enumerate(vcf_list):
         print 'Starting ',vcf
         if args.gz:
-            newVCF = open(args.v + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + ".VCF_Pruned.vcf", "w") # new vcf if gzipped previously 
+            if args.vcf:
+                newVCF = open(args.v + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + ".VCF_Pruned.vcf", "w") # new vcf if gzipped previously 
             src = gzip.open(args.v + vcf)
         else:
-            newVCF = open(args.v+ 'VCF_Pruned/'+vcf[:-3]+"rep"+str(rep+1)+".VCF_Pruned.vcf",'w') # new vcf for storing info from the random draws
+            if args.vcf:
+                newVCF = open(args.v+ 'VCF_Pruned/'+vcf[:-3]+"rep"+str(rep+1)+".VCF_Pruned.vcf",'w') # new vcf for storing info from the random draws
             src = open(args.v + vcf)
 
         current_window, current_lines, chosen_lines, names = [], [], [], []
@@ -166,9 +170,11 @@ for rep in range(int(args.r)):
         for line_idx, line in enumerate(src): #Cycle over lines in the VCF file
             cols = line.replace('\n', '').split('\t')  #Split each line of vcf
             if len(cols) < 2:               ## This should be info just before header
-                newVCF.write(line)
+                if args.vcf:
+                    newVCF.write(line)
             elif cols[0] == "#CHROM": #This should be header
-                newVCF.write(line)
+                if args.vcf:
+                    newVCF.write(line)
                 names.extend(cols[9:])
                 # for j in cols[9:]: #get names of individuals in vcf
                 #     names.append()
@@ -252,7 +258,8 @@ for rep in range(int(args.r)):
         if len(current_window) !=0: # MK ak tam nieco ostalo, tak z toho vyber
             current_window, current_lines, vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
         
-        newVCF.close()
+        if args.vcf:
+            newVCF.close()
 
         print 'Finished ', vcf, '  sites for vcf: ', vcf_sites, '\n'
         tot_sites = tot_sites + vcf_sites
