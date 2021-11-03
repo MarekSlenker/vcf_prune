@@ -78,6 +78,10 @@ def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
     site = current_window[rx]
     genos, dgenos = [], []
     
+    #Convert alleles
+    ref_base = ConvertAllele(site[3])
+    alt_base = ConvertAllele(site[4])
+                             
     for geno in site[9:]:
         geno=geno.split(":")[0]
         geno=geno.split("/")
