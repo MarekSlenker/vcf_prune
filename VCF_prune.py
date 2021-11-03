@@ -186,7 +186,7 @@ for rep in range(int(args.r)):
                 alt_base = ConvertAllele(cols[4])
                 ref_base = ConvertAllele(cols[3])
                 
-                if ((alt_base == -99) or (ref_base == -99)):
+                if ((alt_base == '-99') or (ref_base == '-99')):
                     pass
 
                 elif first_site == True and iii == 0: #Initial setup of info for output files.
