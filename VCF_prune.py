@@ -80,6 +80,8 @@ def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
     for geno in site[9:]:
         geno=geno.split(":")[0]
         geno=geno.split("/")
+        if (len(geno)==1):
+            geno=geno[0].split("|")
 
         for allele in geno:
             if allele == '.':
