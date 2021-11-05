@@ -74,56 +74,62 @@ def TestSnpQuality():
 
 
 def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
-    rx = random.randrange(0,len(current_window))
-    site = current_window[rx]
-    genos, dgenos = [], []
-    
-    #Convert alleles
-    ref_base = ConvertAllele(site[3])
-    alt_base = ConvertAllele(site[4])
-                             
-    for geno in site[9:]:
-        geno=geno.split(":")[0]
-        geno=geno.split("/")
-        if (len(geno)==1):
-            geno=geno[0].split("|")
+    vcf_sites+=1
+    for rep in range(int(args.r)):
+        rx = random.randrange(0,len(current_window))
+        site = current_window[rx]
+        genos, dgenos = [], []
+        
+        #Convert alleles
+        ref_base = ConvertAllele(site[3])
+        alt_base = ConvertAllele(site[4])
+                                
+        for geno in site[9:]:
+            geno=geno.split(":")[0]
+            geno=geno.split("/")
+            if (len(geno)==1):
+                geno=geno[0].split("|")
 
-        for allele in geno:
-            if allele == '.':
-                genos.append(-9)
-            elif allele == '0':
-                genos.append(ref_base)
-            elif allele == '1':
-                genos.append(alt_base)
-            else:
-                print("allele not matched")
-
-        genos.extend(-9 for x in range(args.n - len(geno)))
-
-        if args.s:
-            for allele in numpy.random.choice(geno,2,replace = False):
+            for allele in geno:
                 if allele == '.':
-                    dgenos.append(-9)
+                    genos.append(-9)
                 elif allele == '0':
-                    dgenos.append(ref_base)
+                    genos.append(ref_base)
                 elif allele == '1':
-                    dgenos.append(alt_base)
+                    genos.append(alt_base)
                 else:
                     print("allele not matched")
 
-    vcf_sites+=1
+            genos.extend(-9 for x in range(args.n - len(geno)))
 
-    markernames.append(str(site[1])+"_"+str(site[0]))
+            if args.s:
+                for allele in numpy.random.choice(geno,2,replace = False):
+                    if allele == '.':
+                        dgenos.append(-9)
+                    elif allele == '0':
+                        dgenos.append(ref_base)
+                    elif allele == '1':
+                        dgenos.append(alt_base)
+                    else:
+                        print("allele not matched")
+        
+        exec('markernames' + str(rep+1) + '.append(str(site[0])+"_"+str(site[1]))')
+        # markernames.append(str(site[0])+"_"+str(site[1]))
 
-    structtempfile.write('\t'.join(str(item) for item in genos))
-    structtempfile.write("\n")
+        exec('structtempfile' + str(rep+1) + '.write("\t".join(str(item) for item in genos))')
+        exec('structtempfile' + str(rep+1) + '.write("""\n""")')
+        # structtempfile.write('\t'.join(str(item) for item in genos))
+        # structtempfile.write("\n")
 
-    if args.s:
-        subtempfile.write('\t'.join(str(item) for item in dgenos))
-        subtempfile.write("\n")
+        if args.s:
+            exec('subtempfile' + str(rep+1) + '.write("\t".join(str(item) for item in dgenos))')
+            exec('subtempfile' + str(rep+1) + '.write("""\n""")')
+            # subtempfile.write('\t'.join(str(item) for item in dgenos))
+            # subtempfile.write("\n")
 
-    if args.vcf:
-        newVCF.write(current_lines[rx])
+        if args.vcf:
+            exec('newVCF' + str(rep+1) + '.write(current_lines[rx])')
+            # newVCF.write(current_lines[rx])
 
     current_window, current_lines = [], []
     return current_window, current_lines, vcf_sites
@@ -138,163 +144,213 @@ def ConvertAllele(base):
     return switcher.get(base,"-99")
 
 
+###############x
+## BEGIN
+
+#for rep in range(int(args.r)): 
+
+for rep in range(int(args.r)):
+    exec('markernames' + str(rep+1) + ' = []')
+tot_sites = 0
+
 for rep in range(int(args.r)): 
-    print "Started Rep ",rep+1
+    exec('structtempfile' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/'+args.o+'.rep'+str(rep+1)+'.VCF_Pruned.TransposedStruct.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
+    exec('subtempfile' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/'+args.o+'.rep'+str(rep+1)+'.VCF_Pruned.TransposedStructSubSample.txt",' + ' \'w\', 0)')  # VYHOD ", 0"
+    exec('structfile' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/'+args.o+'.StructureInput.rep'+str(rep+1)+'.VCF_Pruned.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
+    exec('structfile' + str(rep+1) + '.write("\t")')
+    # structtempfile= open(args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",'w')
+    # subtempfile= open(args.v+ 'VCF_Pruned/'+args.o+"               .rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",'w')
+    # structfile= open(args.v+ 'VCF_Pruned/'+args.o+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.txt",'w')
+
+# structfile.write("Ind\tPopFlag\t")
+
+if args.s: #Create files if subset is true.
+    for rep in range(int(args.r)): 
+        exec('subfile' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/'+args.o+'.StructureInput.rep'+str(rep+1)+'.VCF_Pruned.Diploidized.txt",' + ' \'w\')')
+        exec('subfile' + str(rep+1) + '.write("\t")')
+        # subfile= open(args.v+ 'VCF_Pruned/'+args.o+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.Diploidized.txt",'w')
+        # subfile.write("\t")
+
+for iii,vcf in enumerate(vcf_list):
+    print 'Starting ',vcf
+    if args.gz:
+        if args.vcf:
+            for rep in range(int(args.r)): 
+                exec('newVCF' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + '.VCF_Pruned.vcf",' + ' \'w\')')
+            # newVCF = open(args.v + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + ".VCF_Pruned.vcf", "w") # new vcf if gzipped previously 
+        src = gzip.open(args.v + vcf)
+    else:
+        if args.vcf:
+            for rep in range(int(args.r)): 
+                exec('newVCF' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/' +vcf[:-3] + "rep" + str(rep+1) + '.VCF_Pruned.vcf",' + ' \'w\')')
+            # newVCF = open(args.v+ 'VCF_Pruned/'+vcf[:-3]+"rep"+str(rep+1)+".VCF_Pruned.vcf",'w') # new vcf for storing info from the random draws
+        src = open(args.v + vcf)
+
+    current_window, current_lines, chosen_lines, names = [], [], [], []
+    site_num, start, end  = 0, 0, 0 - int(args.d) # end is seh as negative value, due to check: position >= end + int(args.d)   -  to catch first snp of vcf file
+    first_site=True
+    vcf_sites = 0
     
-    markernames, tot_sites = [], 0
-    
-    structtempfile= open(args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",'w')
-    subtempfile= open(args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",'w')
-    structfile= open(args.v+ 'VCF_Pruned/'+args.o+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.txt",'w')
-
-    # structfile.write("Ind\tPopFlag\t")
-    structfile.write("\t")
-
-    if args.s: #Create files if subset is true.
-        subfile= open(args.v+ 'VCF_Pruned/'+args.o+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.Diploidized.txt",'w')
-        #subfile.write("Ind\tPopFlag\t")
-        subfile.write("\t")
-
-    for iii,vcf in enumerate(vcf_list):
-        print 'Starting ',vcf
-        if args.gz:
+    # evaluate contents of each line of input file
+    for line_idx, line in enumerate(src): #Cycle over lines in the VCF file
+        cols = line.replace('\n', '').split('\t')  #Split each line of vcf
+        if len(cols) < 2:               ## This should be info just before header
             if args.vcf:
-                newVCF = open(args.v + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + ".VCF_Pruned.vcf", "w") # new vcf if gzipped previously 
-            src = gzip.open(args.v + vcf)
-        else:
+                for rep in range(int(args.r)): 
+                    exec('newVCF' + str(rep+1) + '.write(line)')
+                # newVCF.write(line)
+        elif cols[0] == "#CHROM": #This should be header
             if args.vcf:
-                newVCF = open(args.v+ 'VCF_Pruned/'+vcf[:-3]+"rep"+str(rep+1)+".VCF_Pruned.vcf",'w') # new vcf for storing info from the random draws
-            src = open(args.v + vcf)
+                for rep in range(int(args.r)): 
+                    exec('newVCF' + str(rep+1) + '.write(line)')
+                # newVCF.write(line)
+            names.extend(cols[9:])
+            # for j in cols[9:]: #get names of individuals in vcf
+            #     names.append()
 
-        current_window, current_lines, chosen_lines, names = [], [], [], []
-        site_num, start, end  = 0, 0, 0 - int(args.d) # end is seh as negative value, due to check: position >= end + int(args.d)   -  to catch first snp of vcf file
-        first_site=True
-        vcf_sites = 0
-        # evaluate contents of each line of input file
-        for line_idx, line in enumerate(src): #Cycle over lines in the VCF file
-            cols = line.replace('\n', '').split('\t')  #Split each line of vcf
-            if len(cols) < 2:               ## This should be info just before header
-                if args.vcf:
-                    newVCF.write(line)
-            elif cols[0] == "#CHROM": #This should be header
-                if args.vcf:
-                    newVCF.write(line)
-                names.extend(cols[9:])
-                # for j in cols[9:]: #get names of individuals in vcf
-                #     names.append()
+        else: 
+            position = int(cols[1])
+            
+            #Convert alleles to Structure input
+            alt_base = ConvertAllele(cols[4])
+            ref_base = ConvertAllele(cols[3])
+            
+            if ((alt_base == '-99') or (ref_base == '-99')):
+                pass
 
-            else: 
-                position = int(cols[1])
-                
-                #Convert alleles to Structure input
-                alt_base = ConvertAllele(cols[4])
-                ref_base = ConvertAllele(cols[3])
-                
-                if ((alt_base == '-99') or (ref_base == '-99')):
-                    pass
+            elif first_site == True and iii == 0: #Initial setup of info for output files.
 
-                elif first_site == True and iii == 0: #Initial setup of info for output files.
+                #Write individual name information for the temporary file that is to be transposed.  Names need to be repeated for each observed allele.
+                for rep in range(int(args.r)):
+                    exec('structtempfile' + str(rep+1) + '.write("\t".join(item for item in names for i in range(args.n)))')
+                    exec('structtempfile' + str(rep+1) + '.write("""\n""")')
+                    # structtempfile.write("\t".join(item for item in names for i in range(args.n)))
+                    # structtempfile.write("\n")
 
-                    #Write individual name information for the temporary file that is to be transposed.  Names need to be repeated for each observed allele.
-                    structtempfile.write("\t".join(item for item in names for i in range(args.n)))
-                    structtempfile.write("\n")
+                # Write PopFlag for each individual which is a unique integer for each population.
+                if len(names)>0:
+                        oldname=names[1][:args.p]
+                popcount=1
+                for j,item in enumerate(names):  
+                    if oldname!=item[:args.p]:
+                        oldname=item[:args.p]
+                        popcount+=1
+                    for rep in range(int(args.r)):
+                        exec('structtempfile' + str(rep+1) + '.write(str("%s\t" % str(popcount)) * args.n)')
+                    #structtempfile.write(str("%s\t" % str(popcount)) * args.n)
+                for rep in range(int(args.r)):
+                    exec('structtempfile' + str(rep+1) + '.write("""\n""")')
+                #structtempfile.write("\n") 
 
-                    # Write PopFlag for each individual which is a unique integer for each population.
+                if args.s:  #Same task as steps immediately above, but adjusted to accomodate subsetting.  
+                    for rep in range(int(args.r)):
+                        exec('subtempfile' + str(rep+1) + '.write("\t".join(item for item in names for i in range(2)))')
+                        exec('subtempfile' + str(rep+1) + '.write("""\n""")')
+                    # subtempfile.write("\t".join(item for item in names for i in range(2)))
+                    # subtempfile.write("\n")
+                    popcount = 1
+                    
                     if len(names)>0:
-                          oldname=names[1][:args.p]
-                    popcount=1
-                    for j,item in enumerate(names):  
+                            oldname=names[1][:args.p]
+                    for j,item in enumerate(names):
                         if oldname!=item[:args.p]:
                             oldname=item[:args.p]
                             popcount+=1
-                        structtempfile.write(str("%s\t" % str(popcount)) * args.n)
-                    structtempfile.write("\n") 
+                        for rep in range(int(args.r)):
+                            exec('subtempfile' + str(rep+1) + '.write(str("%s\t" % str(popcount)) * 2)')
+                            # subtempfile.write(str("%s\t" % str(popcount)) * 2)
+                    for rep in range(int(args.r)):
+                        exec('subtempfile' + str(rep+1) + '.write("""\n""")')
+                        # subtempfile.write("\n")
 
-                    if args.s:  #Same task as steps immediately above, but adjusted to accomodate subsetting.  
-                        subtempfile.write("\t".join(item for item in names for i in range(2)))
-                        subtempfile.write("\n")
-                        popcount = 1
-                        
-                        if len(names)>0:
-                              oldname=names[1][:args.p]
-                        for j,item in enumerate(names):
-                            if oldname!=item[:args.p]:
-                                oldname=item[:args.p]
-                                popcount+=1
-                            subtempfile.write(str("%s\t" % str(popcount)) * 2)
-                        subtempfile.write("\n")
+                first_site=False
 
-                    first_site=False
+                #if first line of vcf passes filters, we go ahead and use it
+                if TestSnpQuality():
+                    current_window.append(cols)
+                    current_lines.append(line)
+                    start=position
+                    end = position + args.w # MK: END je uz zaciatok dalsieho okna
+                    # line_num += 1  # MK NACO???
+                    site_num = 1
 
-                    #if first line of vcf passes filters, we go ahead and use it
-                    if TestSnpQuality():
-                        current_window.append(cols)
-                        current_lines.append(line)
-                        start=position
-                        end = position + args.w # MK: END je uz zaciatok dalsieho okna
-                        # line_num += 1  # MK NACO???
-                        site_num = 1
+            #All lines caught by this statement are within the current window
+            elif position >= start and position < end and site_num!=0:
+                if TestSnpQuality():
+                    current_window.append(cols)
+                    current_lines.append(line)
+                    site_num += 1
 
-                #All lines caught by this statement are within the current window
-                elif position >= start and position < end and site_num!=0:
-                    if TestSnpQuality():
-                        current_window.append(cols)
-                        current_lines.append(line)
-                        site_num += 1
+            #Here, we have moved past the current window and now need to select a site from all sites within the current window before resetting window bounds and moving on to next window.
+            #if first line of vcf does not pass filter, then this statement will catch the first line that does
+            elif position >= end:  # MK neries kraviny, ak prelezie end, tak vyber jeden ztych OK  # MK: END je uz zaciatok dalsieho okna
 
-                #Here, we have moved past the current window and now need to select a site from all sites within the current window before resetting window bounds and moving on to next window.
-                #if first line of vcf does not pass filter, then this statement will catch the first line that does
-                elif position >= end:  # MK neries kraviny, ak prelezie end, tak vyber jeden ztych OK  # MK: END je uz zaciatok dalsieho okna
+                if len(current_window) !=0: # MK ak tam nieco je, tak z toho vyber
 
-                    if len(current_window) !=0: # MK ak tam nieco je, tak z toho vyber
+                    current_window, current_lines, vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
+                    site_num += 1
 
-                        current_window, current_lines, vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
-                        site_num += 1
+                if TestSnpQuality() and position >= end + int(args.d): # ak SNP ktory mame je odst daleko a vyhovuje, tak ho spracuj
+                    start = position
+                    end = position + args.w
 
-                    if TestSnpQuality() and position >= end + int(args.d): # ak SNP ktory mame je odst daleko a vyhovuje, tak ho spracuj
-                        start = position
-                        end = position + args.w
+                    current_window.append(cols)
+                    current_lines.append(line)
+                    site_num += 1
+    
+    if len(current_window) !=0: # MK ak tam nieco ostalo, tak z toho vyber
+        current_window, current_lines, vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
+    
+    if args.vcf:
+        for rep in range(int(args.r)): 
+                exec('newVCF' + str(rep+1) + '.close()')
+        # newVCF.close()
 
-                        current_window.append(cols)
-                        current_lines.append(line)
-                        site_num += 1
-        
-        if len(current_window) !=0: # MK ak tam nieco ostalo, tak z toho vyber
-            current_window, current_lines, vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
-        
-        if args.vcf:
-            newVCF.close()
-
-        print 'Finished ', vcf, '  sites for vcf: ', vcf_sites, '\n'
-        tot_sites = tot_sites + vcf_sites
+    print 'Finished ', vcf, '  sites for vcf: ', vcf_sites, '\n'
+    tot_sites = tot_sites + vcf_sites
 
 
-    #This section transposes the temporary files created during this replicate and adds headers, so that they are formatted according to structure
-    structtempfile.close()
-    subtempfile.close()
+
+#This section transposes the temporary files created during this replicate and adds headers, so that they are formatted according to structure
+for rep in range(int(args.r)):
+    exec('structtempfile' + str(rep+1) + '.close()')
+    exec('subtempfile' + str(rep+1) + '.close()')
+    # structtempfile.close()
+    # subtempfile.close()
 
     #Transposes file
     jj=transposer.transpose(i=args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",d="\t",)
 
     #Write header names for each marker
-    structfile.write('\t'.join(str(marker) for marker in markernames))
-    structfile.write("\n")
-    structfile.write('\n'.join(j for j in jj))
-    structfile.close()
+    exec('structfile' + str(rep+1) + '.write("\t".join(str(marker) for marker in markernames' + str(rep+1) + '))')
+    # structfile.write('\t'.join(str(marker) for marker in markernames))
+    
+    exec('structfile' + str(rep+1) + '.write("""\n""")')
+    # structfile.write("\n")
+    exec('structfile' + str(rep+1) + '.write("\n".join(j for j in jj))')
+    # structfile.write('\n'.join(j for j in jj))
+    
+    exec('structfile' + str(rep+1) + '.close()')
+    # structfile.close()
     if args.s:
         kk=transposer.transpose(i=args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",d="\t",)
-        subfile.write('\t'.join(str(marker) for marker in markernames))
-        subfile.write("\n")
-        subfile.write('\n'.join(k for k in kk))
-        subfile.close()
-
+        exec('subfile' + str(rep+1) + '.write("\t".join(str(marker) for marker in markernames' + str(rep+1) + '))')
+        # subfile.write('\t'.join(str(marker) for marker in markernames))
+        exec('subfile' + str(rep+1) + '.write("""\n""")')
+        # subfile.write("\n")
+        exec('subfile' + str(rep+1) + '.write("\n".join(j for j in jj))')
+        # subfile.write('\n'.join(k for k in kk))
+        exec('subfile' + str(rep+1) + '.write("\n".join(j for j in jj))')
+        # subfile.close()
 
     #remove the temporary files that contained the info that needed to be transposed
     os.remove(args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt")
     os.remove(args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt")
 
-            
-    print 'Finished Rep Number: ',rep+1
+        
+print 'Finished'
+
+
 
 print '\nStructure params:'
 print '    NUMINDS  ', len(names)
