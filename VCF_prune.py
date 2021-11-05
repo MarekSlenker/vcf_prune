@@ -6,23 +6,24 @@ parser = argparse.ArgumentParser(usage ='''
 VCF_prune.py [<args>]
 
 The VCF_prune.py args are:
-  -v     STR     path to vcfs (required)
-  -w     INT     size of scaffold window (required)
-  -d     INT     distance between any 2 windows (required)
+  -v        STR     path to vcfs (required)
+  -w        INT     size of scaffold window (required)
+  -d        INT     distance between any 2 windows (required)
 
-  -m     FLOAT   amount of missing data to allow per site (between 0-1; required)
-  -minf  FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
-  -maxf  FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
+  -m        FLOAT   amount of missing data to allow per site (between 0-1; required)
+  -minf     FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
+  -maxf     FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
+  -minSnps  INT     ploidy of output Structure file (required)
 
-  -o     STR     output prefix (required)
-  -r     INT     number of replicate data sets [1]
+  -o        STR     output prefix (required)
+  -r        INT     number of replicate data sets [1]
   
-  -p     INT     length of population name (required)
-  -n     INT     ploidy of output Structure file (required)
+  -p        INT     length of population name (required)
+  -n        INT     ploidy of output Structure file (required)
 
-  -s             subsample polyploid data to create psuedo-diploid data
-  -gz            use if vcfs are gzipped
-  -vcf           use if you want to print also pruned VCF files
+  -s                subsample polyploid data to create psuedo-diploid data
+  -gz               use if vcfs are gzipped
+  -vcf              use if you want to print also pruned VCF files
 ''')
 parser.add_argument('-v', type = str, metavar = 'vcf_path', required = True, help = 'path to vcfs')
 parser.add_argument('-w', type = int, metavar = 'Window_Size', required = True, help = 'size of scaffold window')
@@ -31,12 +32,15 @@ parser.add_argument('-d', type = int, metavar = 'Window_Distance', required = Tr
 parser.add_argument('-m', type = float, metavar = 'Missing_Data', required = True, help = 'amount of missing data to allow per site (between 0-1)')
 parser.add_argument('-minf', type = float, metavar='Minimum_ALT_REF_Frequency', required = False, default = '0', help='minimum allele frequency, ALT or REF (between 0-1)')
 parser.add_argument('-maxf', type = float, metavar = 'Maximum_ALT_REF_Frequency', required = False, default = '1', help = 'maximum allele frequency, ALT or REF (between 0-1)')
+parser.add_argument('-minSnps', type = int, metavar = 'Minimal amount of SNPs in window. If less, window will be skipped.', required = False, default = '1', help = 'minimal amount of SNPs in window. If less, window will be skipped.')
 parser.add_argument('-o', type = str, metavar = 'Output_Prefix', required = True, help = 'Vcfs retain original scaffold name but the concatenated Structure input file will be a text file with specified by output and within the VCF_Pruned directory')
 parser.add_argument('-p', type = int, metavar = 'PopFlag_Length', required = True, help = 'length of population name')
 parser.add_argument('-n', type=int, metavar='Ploidy', required = True, help='ploidy of Structure file')
 parser.add_argument('-s',  action="store_true", help = 'if true, this will subsample polyploid data to create psuedo-diploid data')
 parser.add_argument('-gz', action="store_true", help='are vcfs gzipped (true) or not (false)')
 parser.add_argument('-vcf', action="store_true", help='if used, pruned VCF files will be printed')
+
+
 
 
 #output population as 2nd column (must be integer for STRUCTURE*)
@@ -74,7 +78,12 @@ def TestSnpQuality():
 
 
 def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
-    vcf_sites+=1
+    print '  SNPs in window: ',len(current_window)  
+    if len(current_window) < args.minSnps: # SKIP
+        print '  skipping window'
+        current_window, current_lines = [], []
+        return current_window, current_lines, vcf_sites
+
     for rep in range(int(args.r)):
         rx = random.randrange(0,len(current_window))
         site = current_window[rx]
@@ -131,6 +140,7 @@ def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
             exec('newVCF' + str(rep+1) + '.write(current_lines[rx])')
             # newVCF.write(current_lines[rx])
 
+    vcf_sites+=1
     current_window, current_lines = [], []
     return current_window, current_lines, vcf_sites
 
@@ -172,7 +182,7 @@ if args.s: #Create files if subset is true.
         # subfile.write("\t")
 
 for iii,vcf in enumerate(vcf_list):
-    print 'Starting ',vcf
+    print vcf
     if args.gz:
         if args.vcf:
             for rep in range(int(args.r)): 
@@ -306,7 +316,7 @@ for iii,vcf in enumerate(vcf_list):
                 exec('newVCF' + str(rep+1) + '.close()')
         # newVCF.close()
 
-    print 'Finished ', vcf, '  sites for vcf: ', vcf_sites, '\n'
+    print '  sites for vcf: ', vcf_sites, '\n'
     tot_sites = tot_sites + vcf_sites
 
 
@@ -327,7 +337,7 @@ for rep in range(int(args.r)):
     
     exec('structfile' + str(rep+1) + '.write("""\n""")')
     # structfile.write("\n")
-    exec('structfile' + str(rep+1) + '.write("\n".join(j for j in jj))')
+    exec('structfile' + str(rep+1) + '.write("""\n""".join(j for j in jj))')
     # structfile.write('\n'.join(j for j in jj))
     
     exec('structfile' + str(rep+1) + '.close()')
@@ -338,9 +348,9 @@ for rep in range(int(args.r)):
         # subfile.write('\t'.join(str(marker) for marker in markernames))
         exec('subfile' + str(rep+1) + '.write("""\n""")')
         # subfile.write("\n")
-        exec('subfile' + str(rep+1) + '.write("\n".join(j for j in jj))')
+        exec('subfile' + str(rep+1) + '.write("""\n""".join(j for j in jj))')
         # subfile.write('\n'.join(k for k in kk))
-        exec('subfile' + str(rep+1) + '.write("\n".join(j for j in jj))')
+        exec('subfile' + str(rep+1) + '.close()')
         # subfile.close()
 
     #remove the temporary files that contained the info that needed to be transposed
