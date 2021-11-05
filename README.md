@@ -15,23 +15,24 @@ To see the required arguments for this script, type `python2 VCF_prune.py` into 
 VCF_prune.py [<args>]
 
 The VCF_prune.py args are:
-  -v     STR     path to vcfs (required)
-  -w     INT     size of scaffold window (required)
-  -d     INT     distance between any 2 windows (required)
+  -v        STR     path to vcfs (required)
+  -w        INT     size of scaffold window (required)
+  -d        INT     distance between any 2 windows (required)
 
-  -m     FLOAT   amount of missing data to allow per site (between 0-1; required)
-  -minf  FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
-  -maxf  FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
-
-  -o     STR     output prefix (required)
-  -r     INT     number of replicate data sets [1]
+  -m        FLOAT   amount of missing data to allow per site (between 0-1; required)
+  -minf     FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
+  -maxf     FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
+  -minSnps  INT     minimal amount of SNPs in window. If less, window will be skipped.
   
-  -p     INT     length of population name (required)
-  -n     INT     ploidy of output Structure file (required)
+  -o        STR     output prefix (required)
+  -r        INT     number of replicate data sets [1]
+  
+  -p        INT     length of population name (required)
+  -n        INT     ploidy of output Structure file (required)
 
-  -s             subsample polyploid data to create psuedo-diploid data
-  -gz            use if vcfs are gzipped
-  -vcf           if used, pruned VCF files will be printed
+  -s                subsample polyploid data to create psuedo-diploid data
+  -gz               use if vcfs are gzipped
+  -vcf              if used, pruned VCF files will be printed
 ```
 This script reads each SNP and evaluates if it passed the desired threshold (set by arguments `-m`, `-minf`, and `-maxf`). If it does, the SNP is recorded. It records each SNP passing threshold within a single window, whose width is set by `-w` argument. When passing the window border, the script randomly selects a single SNP for the STRUCTURE file. Searching for SNPs continues in the next window. Distance in between two windows is set by `-d` argument.  
 
