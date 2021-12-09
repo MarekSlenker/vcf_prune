@@ -73,7 +73,7 @@ def TestSnpQuality():
     currentAlleles = cols[9:]
     missingData = sum(map(lambda x : x[0] == '.', currentAlleles))
                                                                         # Missing_Data            # min. ALT allele frequency     # MAX. ALT allele frequency     # min. ALT allele frequency           # MAX. ALT allele frequency
-    result = cols[6] == 'PASS' and (float(missingData) / len(currentAlleles)) < float(args.m) and AC / AN >= float(args.minf) and AC / AN <= float(args.maxf) and (AN-AC) / AN >= float(args.minf) and (AN-AC) / AN <= float(args.maxf)    
+    result = cols[6] == 'PASS' and (float(missingData) / len(currentAlleles)) <= float(args.m) and AC / AN >= float(args.minf) and AC / AN <= float(args.maxf) and (AN-AC) / AN >= float(args.minf) and (AN-AC) / AN <= float(args.maxf)    
     return result
 
 
