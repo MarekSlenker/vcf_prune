@@ -22,7 +22,7 @@ The VCF_prune.py args are:
   -m        FLOAT   amount of missing data to allow per site (between 0-1; required)
   -minf     FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
   -maxf     FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
-  -minSnps  INT     minimal amount of SNPs in window. If less, window will be skipped.
+  -minSnps  INT     minimal amount of SNPs in window. If less, window will be skipped. [1]
   
   -o        STR     output prefix (required)
   -r        INT     number of replicate data sets [1]
