@@ -23,7 +23,7 @@ The VCF_prune.py args are:
 
   -s                subsample polyploid data to create psuedo-diploid data
   -gz               use if vcfs are gzipped
-  -vcf              use if you want to print also pruned VCF files
+  -vcf              use if you want to print also pruned VCF files 
 ''')
 parser.add_argument('-v', type = str, metavar = 'vcf_path', required = True, help = 'path to vcfs')
 parser.add_argument('-w', type = int, metavar = 'Window_Size', required = True, help = 'size of scaffold window')
