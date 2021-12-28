@@ -6,39 +6,65 @@ parser = argparse.ArgumentParser(usage ='''
 VCF_prune.py [<args>]
 
 The VCF_prune.py args are:
-  -v        STR     path to vcfs (required)
-  -w        INT     size of scaffold window (required)
-  -d        INT     distance between any 2 windows (required)
+  --inVcfs        STR     path to vcfs (required)
+  --winSize       INT     size of scaffold window (required, if --regions is not specified)
+  --winDist       INT     distance between any 2 windows (required, if --regions is not specified)
+  --regions       STR     path to file defining regions from which to take SNPs (1 SNP per region) format: "CHR:FROM-TO" (required, if --winSize and --winDist is not specified)
 
-  -m        FLOAT   amount of missing data to allow per site (between 0-1; required)
-  -minf     FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
-  -maxf     FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
-  -minSnps  INT     Minimal amount of SNPs in window. If less, window will be skipped [1]
+  --missing        FLOAT   amount of missing data to allow per site (between 0-1; required)
+  --minf     FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
+  --maxf     FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
+  --minSnps  INT     Minimal amount of SNPs in window. If less, window will be skipped [1]
 
-  -o        STR     output prefix (required)
-  -r        INT     number of replicate data sets [1]
+  --prefix        STR     output prefix (required)
+  --reps        INT     number of replicate data sets [1]
   
-  -p        INT     length of population name (required)
-  -n        INT     ploidy of output Structure file (required)
+  --popFlagLength        INT     length of population name (required)
+  --ploidy        INT     ploidy of output Structure file (required)
 
-  -s                subsample polyploid data to create psuedo-diploid data
-  -gz               use if vcfs are gzipped
-  -vcf              use if you want to print also pruned VCF files 
+  --subsample                subsample polyploid data to create psuedo-diploid data
+  --gz               use if vcfs are gzipped
+  --vcf              use if you want to print also pruned VCF files 
 ''')
-parser.add_argument('-v', type = str, metavar = 'vcf_path', required = True, help = 'path to vcfs')
-parser.add_argument('-w', type = int, metavar = 'Window_Size', required = True, help = 'size of scaffold window')
-parser.add_argument('-r', type = int, metavar = 'Number_Replications', required = False, default = '1', help = 'Number of replicate data sets')
-parser.add_argument('-d', type = int, metavar = 'Window_Distance', required = True, help = 'distance between any 2 windows')
-parser.add_argument('-m', type = float, metavar = 'Missing_Data', required = True, help = 'amount of missing data to allow per site (between 0-1)')
-parser.add_argument('-minf', type = float, metavar='Minimum_ALT_REF_Frequency', required = False, default = '0', help='minimum allele frequency, ALT or REF (between 0-1)')
-parser.add_argument('-maxf', type = float, metavar = 'Maximum_ALT_REF_Frequency', required = False, default = '1', help = 'maximum allele frequency, ALT or REF (between 0-1)')
-parser.add_argument('-minSnps', type = int, metavar = 'Minimal amount of SNPs in window. If less, window will be skipped.', required = False, default = '1', help = 'minimal amount of SNPs in window. If less, window will be skipped.')
-parser.add_argument('-o', type = str, metavar = 'Output_Prefix', required = True, help = 'Vcfs retain original scaffold name but the concatenated Structure input file will be a text file with specified by output and within the VCF_Pruned directory')
-parser.add_argument('-p', type = int, metavar = 'PopFlag_Length', required = True, help = 'length of population name')
-parser.add_argument('-n', type=int, metavar='Ploidy', required = True, help='ploidy of Structure file')
-parser.add_argument('-s',  action="store_true", help = 'if true, this will subsample polyploid data to create psuedo-diploid data')
-parser.add_argument('-gz', action="store_true", help='are vcfs gzipped (true) or not (false)')
-parser.add_argument('-vcf', action="store_true", help='if used, pruned VCF files will be printed')
+parser.add_argument('--inVcfs', help = 'path to vcfs',
+                    type = str, metavar = 'vcf_path',
+                    required = True)
+parser.add_argument('--winSize', help = 'size of scaffold window',
+                    type = int, metavar = 'Window_Size', 
+                    required = True)
+parser.add_argument('--winDist', help = 'distance between any 2 windows',
+                    type = int, metavar = 'Window_Distance',
+                    required = True)
+parser.add_argument('--reps', help = 'Number of replicate data sets', 
+                    type = int, metavar = 'Number_Replications', 
+                    required = False, default = '1')
+parser.add_argument('--missing', help = 'amount of missing data to allow per site (between 0-1)', 
+                    type = float, metavar = 'Missing_Data',
+                    required = True)
+parser.add_argument('--minf', help='minimum allele frequency, ALT or REF (between 0-1)', 
+                    type = float, metavar='Minimum_ALT_REF_Frequency', 
+                    required = False, default = '0')
+parser.add_argument('--maxf', help = 'maximum allele frequency, ALT or REF (between 0-1)',
+                    type = float, metavar = 'Maximum_ALT_REF_Frequency',
+                    required = False, default = '1')
+parser.add_argument('--minSnps', help = 'minimal amount of SNPs in window. If less, window will be skipped.',
+                    type = int, metavar = 'Minimal amount of SNPs in window. If less, window will be skipped.',
+                    required = False, default = '1' )
+parser.add_argument('--prefix', help = 'Vcfs retain original scaffold name but the concatenated Structure input file will be a text file with specified by output and within the VCF_Pruned directory',
+                    type = str, metavar = 'Output_Prefix', 
+                    required = False, default = '')
+parser.add_argument('--popFlagLength', help = 'length of population name', 
+                    type = int, metavar = 'PopFlag_Length',
+                    required = False, default = '0' )
+parser.add_argument('--ploidy', help='ploidy of Structure file',
+                    type=int, metavar='Ploidy',
+                    required = True)
+parser.add_argument('--subsample', help = 'if true, this will subsample polyploid data to create psuedo-diploid data',
+                    action="store_true")
+parser.add_argument('--gz', help='are vcfs gzipped (true) or not (false)',
+                    action="store_true")
+parser.add_argument('--vcf', help='if used, pruned VCF files will be printed',
+                    action="store_true")
 
 
 
@@ -48,13 +74,13 @@ parser.add_argument('-vcf', action="store_true", help='if used, pruned VCF files
 
 args = parser.parse_args()
 
-if args.v.endswith("/") is False:
-    args.v += "/"
-if os.path.exists(args.v + 'VCF_Pruned/') == False: #Create folder for output if it doesn't already exist
-    os.mkdir(args.v + 'VCF_Pruned/')
+if args.inVcfs.endswith("/") is False:
+    args.inVcfs += "/"
+if os.path.exists(args.inVcfs + 'VCF_Pruned/') == False: #Create folder for output if it doesn't already exist
+    os.mkdir(args.inVcfs + 'VCF_Pruned/')
 vcf_list = []
 
-for file in os.listdir(args.v): #get names of vcf files in args.v directory
+for file in os.listdir(args.inVcfs): #get names of vcf files in args.inVcfs directory
     if args.gz:
         if file[-3:] == '.gz':
             vcf_list.append(file)
@@ -66,25 +92,25 @@ for file in os.listdir(args.v): #get names of vcf files in args.v directory
 count = 0   
 
 
-def TestSnpQuality():
-    info = cols[7].split(";")
+def TestSnpQuality(colsToProcess):
+    info = colsToProcess[7].split(";")
     AN = float(info[2].split("=")[1])
     AC = float(info[0].split("=")[1])
-    currentAlleles = cols[9:]
+    currentAlleles = colsToProcess[9:]
     missingData = sum(map(lambda x : x[0] == '.', currentAlleles))
                                                                         # Missing_Data            # min. ALT allele frequency     # MAX. ALT allele frequency     # min. ALT allele frequency           # MAX. ALT allele frequency
-    result = cols[6] == 'PASS' and (float(missingData) / len(currentAlleles)) <= float(args.m) and AC / AN >= float(args.minf) and AC / AN <= float(args.maxf) and (AN-AC) / AN >= float(args.minf) and (AN-AC) / AN <= float(args.maxf)    
+    result = colsToProcess[6] == 'PASS' and (float(missingData) / len(currentAlleles)) <= float(args.missing) and AC / AN >= float(args.minf) and AC / AN <= float(args.maxf) and (AN-AC) / AN >= float(args.minf) and (AN-AC) / AN <= float(args.maxf)    
     return result
 
 
 def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
-    print '  SNPs in window: ',len(current_window)  
+    print '\n  SNPs in window: ', len(current_window),
     if len(current_window) < args.minSnps: # SKIP
-        print '  skipping window'
+        print '  too few SNPs to select any',
         current_window, current_lines = [], []
-        return current_window, current_lines, vcf_sites
-
-    for rep in range(int(args.r)):
+        return current_window, vcf_sites, current_lines
+    
+    for rep in range(int(args.reps)):
         rx = random.randrange(0,len(current_window))
         site = current_window[rx]
         genos, dgenos = [], []
@@ -109,9 +135,9 @@ def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
                 else:
                     print("allele not matched")
 
-            genos.extend(-9 for x in range(args.n - len(geno)))
+            genos.extend(-9 for x in range(args.ploidy - len(geno)))
 
-            if args.s:
+            if args.subsample:
                 for allele in numpy.random.choice(geno,2,replace = False):
                     if allele == '.':
                         dgenos.append(-9)
@@ -130,7 +156,7 @@ def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
         # structtempfile.write('\t'.join(str(item) for item in genos))
         # structtempfile.write("\n")
 
-        if args.s:
+        if args.subsample:
             exec('subtempfile' + str(rep+1) + '.write("\t".join(str(item) for item in dgenos))')
             exec('subtempfile' + str(rep+1) + '.write("""\n""")')
             # subtempfile.write('\t'.join(str(item) for item in dgenos))
@@ -142,7 +168,7 @@ def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
 
     vcf_sites+=1
     current_window, current_lines = [], []
-    return current_window, current_lines, vcf_sites
+    return current_window, vcf_sites, current_lines
 
 def ConvertAllele(base):
     switcher={
@@ -157,47 +183,47 @@ def ConvertAllele(base):
 ###############x
 ## BEGIN
 
-#for rep in range(int(args.r)): 
+#for rep in range(int(args.reps)): 
 
-for rep in range(int(args.r)):
+for rep in range(int(args.reps)):
     exec('markernames' + str(rep+1) + ' = []')
 tot_sites = 0
 
-for rep in range(int(args.r)): 
-    exec('structtempfile' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/'+args.o+'.rep'+str(rep+1)+'.VCF_Pruned.TransposedStruct.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
-    exec('subtempfile' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/'+args.o+'.rep'+str(rep+1)+'.VCF_Pruned.TransposedStructSubSample.txt",' + ' \'w\', 0)')  # VYHOD ", 0"
-    exec('structfile' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/'+args.o+'.StructureInput.rep'+str(rep+1)+'.VCF_Pruned.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
+for rep in range(int(args.reps)): 
+    exec('structtempfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'.rep'+str(rep+1)+'.VCF_Pruned.TransposedStruct.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
+    exec('subtempfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'.rep'+str(rep+1)+'.VCF_Pruned.TransposedStructSubSample.txt",' + ' \'w\', 0)')  # VYHOD ", 0"
+    exec('structfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'.StructureInput.rep'+str(rep+1)+'.VCF_Pruned.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
     exec('structfile' + str(rep+1) + '.write("\t")')
-    # structtempfile= open(args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",'w')
-    # subtempfile= open(args.v+ 'VCF_Pruned/'+args.o+"               .rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",'w')
-    # structfile= open(args.v+ 'VCF_Pruned/'+args.o+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.txt",'w')
+    # structtempfile= open(args.inVcfs+ 'VCF_Pruned/'+args.prefix+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",'w')
+    # subtempfile= open(args.inVcfs+ 'VCF_Pruned/'+args.prefix+"               .rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",'w')
+    # structfile= open(args.inVcfs+ 'VCF_Pruned/'+args.prefix+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.txt",'w')
 
 # structfile.write("Ind\tPopFlag\t")
 
-if args.s: #Create files if subset is true.
-    for rep in range(int(args.r)): 
-        exec('subfile' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/'+args.o+'.StructureInput.rep'+str(rep+1)+'.VCF_Pruned.Diploidized.txt",' + ' \'w\')')
+if args.subsample: #Create files if subset is true.
+    for rep in range(int(args.reps)): 
+        exec('subfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'.StructureInput.rep'+str(rep+1)+'.VCF_Pruned.Diploidized.txt",' + ' \'w\')')
         exec('subfile' + str(rep+1) + '.write("\t")')
-        # subfile= open(args.v+ 'VCF_Pruned/'+args.o+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.Diploidized.txt",'w')
+        # subfile= open(args.inVcfs+ 'VCF_Pruned/'+args.prefix+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.Diploidized.txt",'w')
         # subfile.write("\t")
 
 for iii,vcf in enumerate(vcf_list):
-    print vcf
+    print vcf,
     if args.gz:
         if args.vcf:
-            for rep in range(int(args.r)): 
-                exec('newVCF' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + '.VCF_Pruned.vcf",' + ' \'w\')')
-            # newVCF = open(args.v + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + ".VCF_Pruned.vcf", "w") # new vcf if gzipped previously 
-        src = gzip.open(args.v + vcf)
+            for rep in range(int(args.reps)): 
+                exec('newVCF' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + '.VCF_Pruned.vcf",' + ' \'w\')')
+            # newVCF = open(args.inVcfs + 'VCF_Pruned/' +vcf[:-6] + "rep" + str(rep+1) + ".VCF_Pruned.vcf", "w") # new vcf if gzipped previously 
+        src = gzip.open(args.inVcfs + vcf)
     else:
         if args.vcf:
-            for rep in range(int(args.r)): 
-                exec('newVCF' + str(rep+1) + '= open("' + args.v + 'VCF_Pruned/' +vcf[:-3] + "rep" + str(rep+1) + '.VCF_Pruned.vcf",' + ' \'w\')')
-            # newVCF = open(args.v+ 'VCF_Pruned/'+vcf[:-3]+"rep"+str(rep+1)+".VCF_Pruned.vcf",'w') # new vcf for storing info from the random draws
-        src = open(args.v + vcf)
+            for rep in range(int(args.reps)): 
+                exec('newVCF' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/' +vcf[:-3] + "rep" + str(rep+1) + '.VCF_Pruned.vcf",' + ' \'w\')')
+            # newVCF = open(args.inVcfs+ 'VCF_Pruned/'+vcf[:-3]+"rep"+str(rep+1)+".VCF_Pruned.vcf",'w') # new vcf for storing info from the random draws
+        src = open(args.inVcfs + vcf)
 
     current_window, current_lines, chosen_lines, names = [], [], [], []
-    site_num, start, end  = 0, 0, 0 - int(args.d) # end is seh as negative value, due to check: position >= end + int(args.d)   -  to catch first snp of vcf file
+    site_num, start, end  = 0, 0, 0 - int(args.winDist) # end is seh as negative value, due to check: position >= end + int(args.winDist)   -  to catch first snp of vcf file
     first_site=True
     vcf_sites = 0
     
@@ -206,12 +232,12 @@ for iii,vcf in enumerate(vcf_list):
         cols = line.replace('\n', '').split('\t')  #Split each line of vcf
         if len(cols) < 2:               ## This should be info just before header
             if args.vcf:
-                for rep in range(int(args.r)): 
+                for rep in range(int(args.reps)): 
                     exec('newVCF' + str(rep+1) + '.write(line)')
                 # newVCF.write(line)
         elif cols[0] == "#CHROM": #This should be header
             if args.vcf:
-                for rep in range(int(args.r)): 
+                for rep in range(int(args.reps)): 
                     exec('newVCF' + str(rep+1) + '.write(line)')
                 # newVCF.write(line)
             names.extend(cols[9:])
@@ -231,62 +257,63 @@ for iii,vcf in enumerate(vcf_list):
             elif first_site == True and iii == 0: #Initial setup of info for output files.
 
                 #Write individual name information for the temporary file that is to be transposed.  Names need to be repeated for each observed allele.
-                for rep in range(int(args.r)):
-                    exec('structtempfile' + str(rep+1) + '.write("\t".join(item for item in names for i in range(args.n)))')
+                for rep in range(int(args.reps)):
+                    exec('structtempfile' + str(rep+1) + '.write("\t".join(item for item in names for i in range(args.ploidy)))')
                     exec('structtempfile' + str(rep+1) + '.write("""\n""")')
-                    # structtempfile.write("\t".join(item for item in names for i in range(args.n)))
+                    # structtempfile.write("\t".join(item for item in names for i in range(args.ploidy)))
                     # structtempfile.write("\n")
 
-                # Write PopFlag for each individual which is a unique integer for each population.
-                if len(names)>0:
-                        oldname=names[1][:args.p]
-                popcount=1
-                for j,item in enumerate(names):  
-                    if oldname!=item[:args.p]:
-                        oldname=item[:args.p]
-                        popcount+=1
-                    for rep in range(int(args.r)):
-                        exec('structtempfile' + str(rep+1) + '.write(str("%s\t" % str(popcount)) * args.n)')
-                    #structtempfile.write(str("%s\t" % str(popcount)) * args.n)
-                for rep in range(int(args.r)):
-                    exec('structtempfile' + str(rep+1) + '.write("""\n""")')
-                #structtempfile.write("\n") 
-
-                if args.s:  #Same task as steps immediately above, but adjusted to accomodate subsetting.  
-                    for rep in range(int(args.r)):
-                        exec('subtempfile' + str(rep+1) + '.write("\t".join(item for item in names for i in range(2)))')
-                        exec('subtempfile' + str(rep+1) + '.write("""\n""")')
-                    # subtempfile.write("\t".join(item for item in names for i in range(2)))
-                    # subtempfile.write("\n")
-                    popcount = 1
-                    
+                # if popFlagLength > 0; Write PopFlag for each individual which is a unique integer for each population.
+                if (args.popFlagLength > 0):
                     if len(names)>0:
-                            oldname=names[1][:args.p]
-                    for j,item in enumerate(names):
-                        if oldname!=item[:args.p]:
-                            oldname=item[:args.p]
+                            oldname=names[1][:args.popFlagLength]
+                    popcount=1
+                    for j,item in enumerate(names):  
+                        if oldname!=item[:args.popFlagLength]:
+                            oldname=item[:args.popFlagLength]
                             popcount+=1
-                        for rep in range(int(args.r)):
-                            exec('subtempfile' + str(rep+1) + '.write(str("%s\t" % str(popcount)) * 2)')
-                            # subtempfile.write(str("%s\t" % str(popcount)) * 2)
-                    for rep in range(int(args.r)):
-                        exec('subtempfile' + str(rep+1) + '.write("""\n""")')
+                        for rep in range(int(args.reps)):
+                            exec('structtempfile' + str(rep+1) + '.write(str("%s\t" % str(popcount)) * args.ploidy)')
+                        #structtempfile.write(str("%s\t" % str(popcount)) * args.ploidy)
+                    for rep in range(int(args.reps)):
+                        exec('structtempfile' + str(rep+1) + '.write("""\n""")')
+                    #structtempfile.write("\n") 
+
+                    if args.subsample:  #Same task as steps immediately above, but adjusted to accomodate subsetting.  
+                        for rep in range(int(args.reps)):
+                            exec('subtempfile' + str(rep+1) + '.write("\t".join(item for item in names for i in range(2)))')
+                            exec('subtempfile' + str(rep+1) + '.write("""\n""")')
+                        # subtempfile.write("\t".join(item for item in names for i in range(2)))
                         # subtempfile.write("\n")
+                        popcount = 1
+                        
+                        if len(names)>0:
+                                oldname=names[1][:args.popFlagLength]
+                        for j,item in enumerate(names):
+                            if oldname!=item[:args.popFlagLength]:
+                                oldname=item[:args.popFlagLength]
+                                popcount+=1
+                            for rep in range(int(args.reps)):
+                                exec('subtempfile' + str(rep+1) + '.write(str("%s\t" % str(popcount)) * 2)')
+                                # subtempfile.write(str("%s\t" % str(popcount)) * 2)
+                        for rep in range(int(args.reps)):
+                            exec('subtempfile' + str(rep+1) + '.write("""\n""")')
+                            # subtempfile.write("\n")
 
                 first_site=False
 
                 #if first line of vcf passes filters, we go ahead and use it
-                if TestSnpQuality():
+                if TestSnpQuality(cols):
                     current_window.append(cols)
                     current_lines.append(line)
                     start=position
-                    end = position + args.w # MK: END je uz zaciatok dalsieho okna
+                    end = position + args.winSize # MK: END je uz zaciatok dalsieho okna
                     # line_num += 1  # MK NACO???
                     site_num = 1
 
             #All lines caught by this statement are within the current window
             elif position >= start and position < end and site_num!=0:
-                if TestSnpQuality():
+                if TestSnpQuality(cols):
                     current_window.append(cols)
                     current_lines.append(line)
                     site_num += 1
@@ -297,39 +324,39 @@ for iii,vcf in enumerate(vcf_list):
 
                 if len(current_window) !=0: # MK ak tam nieco je, tak z toho vyber
 
-                    current_window, current_lines, vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
+                    current_window, vcf_sites, current_lines = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
                     site_num += 1
 
-                if TestSnpQuality() and position >= end + int(args.d): # ak SNP ktory mame je odst daleko a vyhovuje, tak ho spracuj
+                if TestSnpQuality(cols) and position >= end + int(args.winDist): # ak SNP ktory mame je odst daleko a vyhovuje, tak ho spracuj
                     start = position
-                    end = position + args.w
+                    end = position + args.winSize
 
                     current_window.append(cols)
                     current_lines.append(line)
                     site_num += 1
     
     if len(current_window) !=0: # MK ak tam nieco ostalo, tak z toho vyber
-        current_window, current_lines, vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
+        current_window, vcf_sites, current_lines = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
     
     if args.vcf:
-        for rep in range(int(args.r)): 
+        for rep in range(int(args.reps)): 
                 exec('newVCF' + str(rep+1) + '.close()')
         # newVCF.close()
 
-    print '  sites for vcf: ', vcf_sites, '\n'
+    print '\n  sites for vcf: ', vcf_sites, '\n'
     tot_sites = tot_sites + vcf_sites
 
 
 
 #This section transposes the temporary files created during this replicate and adds headers, so that they are formatted according to structure
-for rep in range(int(args.r)):
+for rep in range(int(args.reps)):
     exec('structtempfile' + str(rep+1) + '.close()')
     exec('subtempfile' + str(rep+1) + '.close()')
     # structtempfile.close()
     # subtempfile.close()
 
     #Transposes file
-    jj=transposer.transpose(i=args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",d="\t",)
+    jj=transposer.transpose(i=args.inVcfs+ 'VCF_Pruned/'+args.prefix+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",d="\t",)
 
     #Write header names for each marker
     exec('structfile' + str(rep+1) + '.write("\t".join(str(marker) for marker in markernames' + str(rep+1) + '))')
@@ -342,8 +369,8 @@ for rep in range(int(args.r)):
     
     exec('structfile' + str(rep+1) + '.close()')
     # structfile.close()
-    if args.s:
-        kk=transposer.transpose(i=args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",d="\t",)
+    if args.subsample:
+        kk=transposer.transpose(i=args.inVcfs+ 'VCF_Pruned/'+args.prefix+".rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",d="\t",)
         exec('subfile' + str(rep+1) + '.write("\t".join(str(marker) for marker in markernames' + str(rep+1) + '))')
         # subfile.write('\t'.join(str(marker) for marker in markernames))
         exec('subfile' + str(rep+1) + '.write("""\n""")')
@@ -354,8 +381,8 @@ for rep in range(int(args.r)):
         # subfile.close()
 
     #remove the temporary files that contained the info that needed to be transposed
-    os.remove(args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt")
-    os.remove(args.v+ 'VCF_Pruned/'+args.o+".rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt")
+    os.remove(args.inVcfs+ 'VCF_Pruned/'+args.prefix+".rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt")
+    os.remove(args.inVcfs+ 'VCF_Pruned/'+args.prefix+".rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt")
 
         
 print 'Finished'
@@ -365,7 +392,7 @@ print 'Finished'
 print '\nStructure params:'
 print '    NUMINDS  ', len(names)
 print '    NUMLOCI  ', tot_sites
-print '    PLOIDY   ', args.n
+print '    PLOIDY   ', args.ploidy
 print '    LABEL     1'
-print '    POPDATA   1'
+print '    POPDATA  ', ("1" if args.popFlagLength > 0 else "0")
 
