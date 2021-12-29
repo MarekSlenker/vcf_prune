@@ -1,4 +1,4 @@
-# VCF_prune v 1.0.0
+# VCF_prune v 1.1.0
 
 The initial version of this script was created by [Jordan Koch](https://github.com/jmkoch) and [Patrick Monnahan](https://github.com/pmonnahan). 
  
