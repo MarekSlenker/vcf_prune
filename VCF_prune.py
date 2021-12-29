@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
-import os, sys, subprocess, argparse, transposer, random, numpy, csv, scipy, gzip, re
+import os, argparse, transposer, random, numpy, gzip, re
+from numpy.core.fromnumeric import size
 
 # create variables that can be entered in the command line
 parser = argparse.ArgumentParser(usage ='''
 VCF_prune.py [<args>]
 
 The VCF_prune.py args are:
-  --inVcfs        STR     path to vcfs (required)
-  --winSize       INT     size of scaffold window (required, if --regions is not specified)
-  --winDist       INT     distance between any 2 windows (required, if --regions is not specified)
-  --regions       STR     path to file defining regions from which to take SNPs (1 SNP per region) format: "CHR:FROM-TO" (required, if --winSize and --winDist is not specified)
+  --inVcfs    STR     path to vcfs (required)
+  --winSize   INT     size of scaffold window (required, if --regions is not specified)
+  --winDist   INT     distance between any 2 windows (required, if --regions is not specified)
+  --regions   STR     path to file defining regions from which to take SNPs (1 SNP per region) format: "CHR:FROM-TO" (required, if --winSize and --winDist is not specified)
 
-  --missing        FLOAT   amount of missing data to allow per site (between 0-1; required)
-  --minf     FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
-  --maxf     FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
-  --minSnps  INT     Minimal amount of SNPs in window. If less, window will be skipped [1]
+  --missing   FLOAT   amount of missing data to allow per site (between 0-1) [1]
+  --minf      FLOAT   minimum allele frequency, ALT or REF (between 0-1) [0]
+  --maxf      FLOAT   maximum allele frequency, ALT or REF (between 0-1) [1]
+  --minSnps   INT     Minimal amount of SNPs in window. If less, window will be skipped [1]
 
-  --prefix        STR     output prefix (required)
-  --reps        INT     number of replicate data sets [1]
+  --prefix    STR     output prefix
+  --reps      INT     number of replicates to produce (data sets) [1]
   
-  --popFlagLength        INT     length of population name (required)
-  --ploidy        INT     ploidy of output Structure file (required)
+  --popFlagLength  INT     length of population name
+  --ploidy         INT     ploidy of output Structure file [2]
 
-  --subsample                subsample polyploid data to create psuedo-diploid data
+  --subsample        subsample polyploid data to create psuedo-diploid data
   --gz               use if vcfs are gzipped
   --vcf              use if you want to print also pruned VCF files 
 ''')
@@ -43,7 +44,7 @@ parser.add_argument('--reps', help = 'Number of replicate data sets',
                     required = False, default = '1')
 parser.add_argument('--missing', help = 'amount of missing data to allow per site (between 0-1)', 
                     type = float, metavar = 'Missing_Data',
-                    required = True)
+                    required = False, default = '1')
 parser.add_argument('--minf', help='minimum allele frequency, ALT or REF (between 0-1)', 
                     type = float, metavar='Minimum_ALT_REF_Frequency', 
                     required = False, default = '0')
@@ -52,7 +53,7 @@ parser.add_argument('--maxf', help = 'maximum allele frequency, ALT or REF (betw
                     required = False, default = '1')
 parser.add_argument('--minSnps', help = 'minimal amount of SNPs in window. If less, window will be skipped.',
                     type = int, metavar = 'Minimal amount of SNPs in window. If less, window will be skipped.',
-                    required = False, default = '1' )
+                    required = False, default = '1')
 parser.add_argument('--prefix', help = 'Vcfs retain original scaffold name but the concatenated Structure input file will be a text file with specified by output and within the VCF_Pruned directory',
                     type = str, metavar = 'Output_Prefix', 
                     required = False, default='')
@@ -61,7 +62,7 @@ parser.add_argument('--popFlagLength', help = 'length of population name',
                     required = False, default = '0' )
 parser.add_argument('--ploidy', help='ploidy of Structure file',
                     type=int, metavar='Ploidy',
-                    required = True)
+                    required = False, default = '2')
 parser.add_argument('--subsample', help = 'if true, this will subsample polyploid data to create psuedo-diploid data',
                     action="store_true")
 parser.add_argument('--gz', help='are vcfs gzipped (true) or not (false)',
@@ -206,6 +207,7 @@ for rep in range(int(args.reps)):
 
 tot_sites = 0
 first_site=True
+names = []
 
 if args.subsample: #Create files if subset is true.
     for rep in range(int(args.reps)): 
@@ -234,7 +236,8 @@ for vcf in vcf_list:
 
     # PREOCESS HEADER
     # evaluate contents of each line of input file
-    for line in src: #Cycle over lines in the VCF file
+    while True: #Cycle over lines in the VCF file
+        line = src.readline()
         cols = line.replace('\n', '').split('\t')  #Split each line of vcf
         if len(cols) < 2:               ## This should be info just before header
             if args.vcf:
@@ -247,7 +250,6 @@ for vcf in vcf_list:
                     exec('newVCF' + str(rep+1) + '.write(line)')
 
             if first_site == True: #Initial setup of info for output files.
-                names = []
                 names.extend(cols[9:])
                 #Write individual name information for the temporary file that is to be transposed.  Names need to be repeated for each observed allele.
                 for rep in range(int(args.reps)):
@@ -291,11 +293,13 @@ for vcf in vcf_list:
 
     # PROCESS REGIONS
     if (args.regions is not None):  
-        # peek_line - to find current chrom
+        
+        # peek line - to find current chrom
         xpos = src.tell()
         xline = src.readline()
         src.seek(xpos)
-        chrom = xline.replace('\n', '').split('\t')[0]  #Split each line of vcf
+        
+        chrom = xline.replace('\n', '').split('\t')[0]  # get CHROM
 
         currentRegions, rowsOfRegions = [], []
         for line in lines:
@@ -320,7 +324,7 @@ for vcf in vcf_list:
                 pass
             
             rr = numpy.where((position >= currentRegsBegins) == (position <= currentRegsEnds))[0] # find where position is inside the range
-            if rr:
+            if rr.size == 1:
                 if TestSnpQuality(cols):
                     rowsOfRegions[rr[0]].append(cols)
 
@@ -339,7 +343,6 @@ for vcf in vcf_list:
         for line in src: #Cycle over lines in the VCF file
             cols = line.replace('\n', '').split('\t')  #Split each line of vcf
                 
-            chrom = int(cols[0])
             position = int(cols[1])
             alt_base = ConvertAllele(cols[4])
             ref_base = ConvertAllele(cols[3])
@@ -421,4 +424,4 @@ print '    NUMLOCI  ', tot_sites
 print '    PLOIDY   ', args.ploidy
 print '    LABEL     1'
 print '    POPDATA  ', ("1" if args.popFlagLength > 0 else "0")
-
+print
