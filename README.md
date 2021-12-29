@@ -1,4 +1,4 @@
-# VCF_prune
+# VCF_prune v 1.0.0
 
 This code was created in collaboration with [Jordan Koch](https://github.com/jmkoch) and [Patrick Monnahan](https://github.com/pmonnahan)
  
