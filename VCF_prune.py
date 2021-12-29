@@ -79,9 +79,9 @@ args = parser.parse_args()
 
 
 if ((args.regions is None) and (args.winSize is not None) and (args.winDist is not None)):
-    path="WGS"
+    pass # WGS
 elif ((args.regions is not None) and (args.winSize is None) and (args.winDist is None)):
-    path="RADSEQ"
+    pass # RADSEQ
 else:
     print '\n  ERROR: you have to provide either --winSize and --winDist, OR --regions'
     exit()
@@ -121,12 +121,11 @@ def TestSnpQuality(colsToProcess):
     result = colsToProcess[6] == 'PASS' and (float(missingData) / len(currentAlleles)) <= float(args.missing) and AC / AN >= float(args.minf) and AC / AN <= float(args.maxf) and (AN-AC) / AN >= float(args.minf) and (AN-AC) / AN <= float(args.maxf)    
     return result
 
-def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
-    print '\n  SNPs in window: ', len(current_window),
+def ProcessCurrentWindow(current_window, vcf_sites, area):
+    print '\n  SNPs in ', area, ': ', len(current_window),
     if len(current_window) < args.minSnps: # SKIP
         print '  too few SNPs to select any',
-        current_window, current_lines = [], []
-        return current_window, vcf_sites, current_lines
+        return vcf_sites
     
     for rep in range(int(args.reps)):
         rx = random.randrange(0,len(current_window))
@@ -167,26 +166,20 @@ def ProcessCurrentWindow(current_window, vcf_sites, current_lines):
                         print("allele not matched")
         
         exec('markernames' + str(rep+1) + '.append(str(site[0])+"_"+str(site[1]))')
-        # markernames.append(str(site[0])+"_"+str(site[1]))
 
         exec('structtempfile' + str(rep+1) + '.write("\t".join(str(item) for item in genos))')
         exec('structtempfile' + str(rep+1) + '.write("""\n""")')
-        # structtempfile.write('\t'.join(str(item) for item in genos))
-        # structtempfile.write("\n")
 
         if args.subsample:
             exec('subtempfile' + str(rep+1) + '.write("\t".join(str(item) for item in dgenos))')
             exec('subtempfile' + str(rep+1) + '.write("""\n""")')
-            # subtempfile.write('\t'.join(str(item) for item in dgenos))
-            # subtempfile.write("\n")
 
         if args.vcf:
-            exec('newVCF' + str(rep+1) + '.write(current_lines[rx])')
-            # newVCF.write(current_lines[rx])
+            exec('newVCF' + str(rep+1) + '.write(\'\t\'.join(current_window[rx]))')
+            exec('newVCF' + str(rep+1) + '.write("""\n""")')
 
     vcf_sites+=1
-    current_window, current_lines = [], []
-    return current_window, vcf_sites, current_lines
+    return vcf_sites
 
 def ConvertAllele(base):
     switcher={
@@ -210,9 +203,6 @@ for rep in range(int(args.reps)):
     exec('subtempfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'rep'+str(rep+1)+'.VCF_Pruned.TransposedStructSubSample.txt",' + ' \'w\', 0)')  # VYHOD ", 0"
     exec('structfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'StructureInput.rep'+str(rep+1)+'.VCF_Pruned.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
     exec('structfile' + str(rep+1) + '.write("\t")')
-    # structtempfile= open(args.inVcfs+ 'VCF_Pruned/'+args.prefix+"rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",'w')
-    # subtempfile= open(args.inVcfs+ 'VCF_Pruned/'+args.prefix+"               .rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",'w')
-    # structfile= open(args.inVcfs+ 'VCF_Pruned/'+args.prefix+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.txt",'w')
 
 tot_sites = 0
 first_site=True
@@ -221,8 +211,7 @@ if args.subsample: #Create files if subset is true.
     for rep in range(int(args.reps)): 
         exec('subfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'StructureInput.rep'+str(rep+1)+'.VCF_Pruned.Diploidized.txt",' + ' \'w\')')
         exec('subfile' + str(rep+1) + '.write("\t")')
-        # subfile= open(args.inVcfs+ 'VCF_Pruned/'+args.prefix+".StructureInput.rep"+str(rep+1)+".VCF_Pruned.Diploidized.txt",'w')
-        # subfile.write("\t")
+
 
 for vcf in vcf_list:
     print vcf,
@@ -241,10 +230,9 @@ for vcf in vcf_list:
 
     
     
-    current_window, current_lines, chosen_lines, names = [], [], [], []
-    site_num, start, end, vcf_sites = 0, 0, 0 - int(args.winDist), 0 # end is seh as negative value, due to check: position >= end + int(args.winDist)   -  to catch first snp of vcf file
+    vcf_sites = 0 # end is seh as negative value, due to check: position >= end + int(args.winDist)   -  to catch first snp of vcf file
 
-    
+    # PREOCESS HEADER
     # evaluate contents of each line of input file
     for line in src: #Cycle over lines in the VCF file
         cols = line.replace('\n', '').split('\t')  #Split each line of vcf
@@ -257,12 +245,10 @@ for vcf in vcf_list:
             if args.vcf:
                 for rep in range(int(args.reps)): 
                     exec('newVCF' + str(rep+1) + '.write(line)')
-                # newVCF.write(line)
-            names.extend(cols[9:])
-            # for j in cols[9:]: #get names of individuals in vcf
-            #     names.append()
 
             if first_site == True: #Initial setup of info for output files.
+                names = []
+                names.extend(cols[9:])
                 #Write individual name information for the temporary file that is to be transposed.  Names need to be repeated for each observed allele.
                 for rep in range(int(args.reps)):
                     exec('structtempfile' + str(rep+1) + '.write("\t".join(item for item in names for i in range(args.ploidy)))')
@@ -300,8 +286,60 @@ for vcf in vcf_list:
                             exec('subtempfile' + str(rep+1) + '.write("""\n""")')
                 
                 first_site=False
+            break # skip remaining lines
 
-        else: 
+
+    # PROCESS REGIONS
+    if (args.regions is not None):  
+        # peek_line - to find current chrom
+        xpos = src.tell()
+        xline = src.readline()
+        src.seek(xpos)
+        chrom = xline.replace('\n', '').split('\t')[0]  #Split each line of vcf
+
+        currentRegions, rowsOfRegions = [], []
+        for line in lines:
+            if line[0] == chrom:
+                currentRegions.append(line)
+    
+        currentRegsBegins = numpy.array([int(x) for x in numpy.array(currentRegions)[:,1]])
+        currentRegsEnds = numpy.array([int(x) for x in numpy.array(currentRegions)[:,2]])
+            
+        for i in range(0,len(currentRegions)):
+            rowsOfRegions.append([])
+
+
+        for line in src: #Cycle over lines in the VCF file
+            cols = line.replace('\n', '').split('\t')  #Split each line of vcf
+                
+            position = int(cols[1])
+            alt_base = ConvertAllele(cols[4])
+            ref_base = ConvertAllele(cols[3])
+            
+            if ((alt_base == '-99') or (ref_base == '-99')):
+                pass
+            
+            rr = numpy.where((position >= currentRegsBegins) == (position <= currentRegsEnds))[0] # find where position is inside the range
+            if rr:
+                if TestSnpQuality(cols):
+                    rowsOfRegions[rr[0]].append(cols)
+
+        # pocess regions
+        for region in rowsOfRegions:
+            if region:
+                    vcf_sites = ProcessCurrentWindow(region, vcf_sites, "region")
+
+
+
+    # PROCESS USING  winSize and winDist
+    if (args.winSize is not None) and (args.winDist is not None): 
+        start, end = 0, 0 - int(args.winDist)
+        current_window = []
+
+        for line in src: #Cycle over lines in the VCF file
+            cols = line.replace('\n', '').split('\t')  #Split each line of vcf
+                
+            chrom = int(cols[0])
             position = int(cols[1])
             alt_base = ConvertAllele(cols[4])
             ref_base = ConvertAllele(cols[3])
@@ -309,18 +347,10 @@ for vcf in vcf_list:
             if ((alt_base == '-99') or (ref_base == '-99')):
                 pass
 
-            #if (path == 'WGS') processLikeWGS()
-
-            #if (path == 'RADSEQ') processLikeRADSEQ()
-
-
-
             #All lines caught by this statement are within the current window
-            elif position >= start and position < end and site_num!=0:
+            if position >= start and position < end: #  and site_num!=0
                 if TestSnpQuality(cols):
                     current_window.append(cols)
-                    current_lines.append(line)
-                    site_num += 1
 
             #Here, we have moved past the current window and now need to select a site from all sites within the current window before resetting window bounds and moving on to next window.
             #if first line of vcf does not pass filter, then this statement will catch the first line that does
@@ -328,27 +358,29 @@ for vcf in vcf_list:
 
                 if len(current_window) !=0: # MK ak tam nieco je, tak z toho vyber
 
-                    current_window, vcf_sites, current_lines = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
-                    site_num += 1
+                    vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, "window")
+                    current_window = [] 
 
                 if TestSnpQuality(cols) and position >= end + int(args.winDist): # ak SNP ktory mame je odst daleko a vyhovuje, tak ho spracuj
                     start = position
                     end = position + args.winSize
 
                     current_window.append(cols)
-                    current_lines.append(line)
-                    site_num += 1
-    
-    if len(current_window) !=0: # MK ak tam nieco ostalo, tak z toho vyber
-        current_window, vcf_sites, current_lines = ProcessCurrentWindow(current_window, vcf_sites, current_lines)
-    
+
+        if len(current_window) !=0: # MK ak tam nieco ostalo, tak z toho vyber
+            vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, "window")
+            current_window = [] 
+
+
     if args.vcf:
         for rep in range(int(args.reps)): 
                 exec('newVCF' + str(rep+1) + '.close()')
-        # newVCF.close()
 
     print '\n  sites for vcf: ', vcf_sites, '\n'
     tot_sites = tot_sites + vcf_sites
+
+
+
 
 
 
@@ -356,33 +388,23 @@ for vcf in vcf_list:
 for rep in range(int(args.reps)):
     exec('structtempfile' + str(rep+1) + '.close()')
     exec('subtempfile' + str(rep+1) + '.close()')
-    # structtempfile.close()
-    # subtempfile.close()
 
     #Transposes file
     jj=transposer.transpose(i=args.inVcfs+ 'VCF_Pruned/'+args.prefix+"rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt",d="\t",)
 
     #Write header names for each marker
     exec('structfile' + str(rep+1) + '.write("\t".join(str(marker) for marker in markernames' + str(rep+1) + '))')
-    # structfile.write('\t'.join(str(marker) for marker in markernames))
     
     exec('structfile' + str(rep+1) + '.write("""\n""")')
-    # structfile.write("\n")
     exec('structfile' + str(rep+1) + '.write("""\n""".join(j for j in jj))')
-    # structfile.write('\n'.join(j for j in jj))
     
     exec('structfile' + str(rep+1) + '.close()')
-    # structfile.close()
     if args.subsample:
         kk=transposer.transpose(i=args.inVcfs+ 'VCF_Pruned/'+args.prefix+"rep"+str(rep+1)+".VCF_Pruned.TransposedStructSubSample.txt",d="\t",)
         exec('subfile' + str(rep+1) + '.write("\t".join(str(marker) for marker in markernames' + str(rep+1) + '))')
-        # subfile.write('\t'.join(str(marker) for marker in markernames))
         exec('subfile' + str(rep+1) + '.write("""\n""")')
-        # subfile.write("\n")
         exec('subfile' + str(rep+1) + '.write("""\n""".join(j for j in jj))')
-        # subfile.write('\n'.join(k for k in kk))
         exec('subfile' + str(rep+1) + '.close()')
-        # subfile.close()
 
     #remove the temporary files that contained the info that needed to be transposed
     os.remove(args.inVcfs+ 'VCF_Pruned/'+args.prefix+"rep"+str(rep+1)+".VCF_Pruned.TransposedStruct.txt")
