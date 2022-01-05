@@ -331,6 +331,10 @@ for vcf in vcf_list:
             if rr.size == 1:
                 if TestSnpQuality(cols):
                     rowsOfRegions[rr[0]].append(cols)
+            #if rr.size == 0:
+            #    print "!!", chrom, ": ", position, "out of regions"
+            #if rr.size > 1:
+            #    print "!!", chrom, ": ", position, "in more than one region"                    
 
         # pocess regions
         for r in range(0, len(rowsOfRegions), 1): 
