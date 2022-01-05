@@ -78,6 +78,10 @@ parser.add_argument('--vcf', help='if used, pruned VCF files will be printed',
 
 args = parser.parse_args()
 
+print '# ARGS:', 
+for arg in sys.argv:
+    print arg,  
+print
 
 if ((args.regions is None) and (args.winSize is not None) and (args.winDist is not None)):
     pass # WGS
