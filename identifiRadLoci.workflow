@@ -37,7 +37,7 @@ for (file in inputFiles) {
     dt <- fread(file,sep="\t", header=F)
     header=dt[,1:2]
     data=dt[,3:ncol(dt)]
-    data$toTake = apply(data, 1, function(x) (sum(x >= minCoverage)/100 > percentMiss))  # coverage at least "minCoverage" in more than 75% of samples
+    data$toTake = apply(data, 1, function(x) (sum(x >= minCoverage)/length(x) > percentMiss))  # coverage at least "minCoverage" in more than 75% of samples
     header = header[data$toTake,]
     #colnames(header) = c("CHROM", "POS")
     
