@@ -333,9 +333,12 @@ for vcf in vcf_list:
                     rowsOfRegions[rr[0]].append(cols)
 
         # pocess regions
-        for region in rowsOfRegions:
-            if region:
-                    vcf_sites = ProcessCurrentWindow(region, vcf_sites, "region")
+        for r in range(0, len(rowsOfRegions), 1): 
+            regionName = currentRegions[r][0] + ":" + currentRegions[r][1] + "-" + currentRegions[r][2]
+            if rowsOfRegions[r]:
+                vcf_sites = ProcessCurrentWindow(rowsOfRegions[r], vcf_sites, regionName)
+            else:
+                print '\n  SNPs in ', regionName, ': 0; region is empty/invariant',
 
 
 
