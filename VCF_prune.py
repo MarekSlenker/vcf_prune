@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, argparse, transposer, random, numpy, gzip, re
+import sys, os, argparse, transposer, random, numpy, gzip, re
 from numpy.core.fromnumeric import size
 
 # create variables that can be entered in the command line
@@ -81,7 +81,7 @@ args = parser.parse_args()
 print '# ARGS:', 
 for arg in sys.argv:
     print arg,  
-print
+print; print; 
 
 if ((args.regions is None) and (args.winSize is not None) and (args.winDist is not None)):
     pass # WGS
