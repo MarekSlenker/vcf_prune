@@ -207,6 +207,8 @@ for rep in range(int(args.reps)):
     exec('structtempfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'rep'+str(rep+1)+'.VCF_Pruned.TransposedStruct.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
     exec('subtempfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'rep'+str(rep+1)+'.VCF_Pruned.TransposedStructSubSample.txt",' + ' \'w\', 0)')  # VYHOD ", 0"
     exec('structfile' + str(rep+1) + '= open("' + args.inVcfs + 'VCF_Pruned/'+args.prefix+'StructureInput.rep'+str(rep+1)+'.VCF_Pruned.txt",' + ' \'w\', 0)')   # VYHOD ", 0"
+    if (args.popFlagLength > 0):
+        exec('structfile' + str(rep+1) + '.write("\t")')
     exec('structfile' + str(rep+1) + '.write("\t")')
 
 tot_sites = 0
