@@ -69,7 +69,8 @@ parser.add_argument('--gz', help='are vcfs gzipped (true) or not (false)',
                     action="store_true")
 parser.add_argument('--vcf', help='if used, pruned VCF files will be printed',
                     action="store_true")
-
+parser.add_argument('--verbose', help='provides additional details',
+                    action="store_true")
 
 
 
@@ -122,7 +123,7 @@ def TestSnpQuality(colsToProcess):
     AC = float(info[0].split("=")[1])
     currentAlleles = colsToProcess[9:]
     missingData = sum(map(lambda x : x[0] == '.', currentAlleles))
-                                                                                       # Missing_Data            # min. ALT allele frequency     # MAX. ALT allele frequency     # min. REF allele frequency           # MAX. REF allele frequency
+                                                                        # Missing_Data            # min. ALT allele frequency     # MAX. ALT allele frequency     # min. ALT allele frequency           # MAX. ALT allele frequency
     result = colsToProcess[6] == 'PASS' and (float(missingData) / len(currentAlleles)) <= float(args.missing) and AC / AN >= float(args.minf) and AC / AN <= float(args.maxf) and (AN-AC) / AN >= float(args.minf) and (AN-AC) / AN <= float(args.maxf)    
     return result
 
@@ -238,7 +239,7 @@ for vcf in vcf_list:
 
     
     
-    vcf_sites = 0 # end is seh as negative value, due to check: position >= end + int(args.winDist)   -  to catch first snp of vcf file
+    vcf_sites, passedSnps, skippedSnps = 0, 0, 0
 
     # PREOCESS HEADER
     # evaluate contents of each line of input file
@@ -333,6 +334,9 @@ for vcf in vcf_list:
             if rr.size == 1:
                 if TestSnpQuality(cols):
                     rowsOfRegions[rr[0]].append(cols)
+                    passedSnps+=1
+                else:
+                    skippedSnps+=1
             #if rr.size == 0:
             #    print "!!", chrom, ": ", position, "out of regions"
             #if rr.size > 1:
@@ -344,7 +348,8 @@ for vcf in vcf_list:
             if rowsOfRegions[r]:
                 vcf_sites = ProcessCurrentWindow(rowsOfRegions[r], vcf_sites, regionName)
             else:
-                print '\n  SNPs in ', regionName, ': 0; region is empty/invariant',
+                if args.verbose:
+                    print '\n  SNPs in ', regionName, ': 0; region is empty/invariant',
 
 
 
@@ -367,6 +372,9 @@ for vcf in vcf_list:
             if position >= start and position < end: #  and site_num!=0
                 if TestSnpQuality(cols):
                     current_window.append(cols)
+                    passedSnps+=1
+                else:
+                    skippedSnps+=1
 
             #Here, we have moved past the current window and now need to select a site from all sites within the current window before resetting window bounds and moving on to next window.
             #if first line of vcf does not pass filter, then this statement will catch the first line that does
@@ -380,8 +388,10 @@ for vcf in vcf_list:
                 if TestSnpQuality(cols) and position >= end + int(args.winDist): # ak SNP ktory mame je odst daleko a vyhovuje, tak ho spracuj
                     start = position
                     end = position + args.winSize
-
                     current_window.append(cols)
+                    passedSnps+=1
+                else:
+                    skippedSnps+=1
 
         if len(current_window) !=0: # MK ak tam nieco ostalo, tak z toho vyber
             vcf_sites = ProcessCurrentWindow(current_window, vcf_sites, "window")
@@ -392,7 +402,12 @@ for vcf in vcf_list:
         for rep in range(int(args.reps)): 
                 exec('newVCF' + str(rep+1) + '.close()')
 
-    print '\n  sites for vcf: ', vcf_sites, '\n'
+    print '\n  sites for vcf: ', vcf_sites
+    print '  numb of sites, passed \"--missing\", \"--minf\", \"--minf\"... : ', passedSnps
+    print '  numb of sites, skipped due to  \"--missing\", \"--minf\", \"--minf\"... : ', skippedSnps, '\n'
+
+
+
     tot_sites = tot_sites + vcf_sites
 
 
