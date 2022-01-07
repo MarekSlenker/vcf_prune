@@ -122,7 +122,7 @@ def TestSnpQuality(colsToProcess):
     AC = float(info[0].split("=")[1])
     currentAlleles = colsToProcess[9:]
     missingData = sum(map(lambda x : x[0] == '.', currentAlleles))
-                                                                        # Missing_Data            # min. ALT allele frequency     # MAX. ALT allele frequency     # min. ALT allele frequency           # MAX. ALT allele frequency
+                                                                                       # Missing_Data            # min. ALT allele frequency     # MAX. ALT allele frequency     # min. REF allele frequency           # MAX. REF allele frequency
     result = colsToProcess[6] == 'PASS' and (float(missingData) / len(currentAlleles)) <= float(args.missing) and AC / AN >= float(args.minf) and AC / AN <= float(args.maxf) and (AN-AC) / AN >= float(args.minf) and (AN-AC) / AN <= float(args.maxf)    
     return result
 
