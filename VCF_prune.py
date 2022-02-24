@@ -328,7 +328,7 @@ for vcf in vcf_list:
             ref_base = ConvertAllele(cols[3])
             
             if ((alt_base == '-99') or (ref_base == '-99')):
-                pass
+                continue
             
             rr = numpy.where((position >= currentRegsBegins) == (position <= currentRegsEnds))[0] # find where position is inside the range
             if rr.size == 1:
@@ -366,7 +366,7 @@ for vcf in vcf_list:
             ref_base = ConvertAllele(cols[3])
             
             if ((alt_base == '-99') or (ref_base == '-99')):
-                pass
+                continue
 
             #All lines caught by this statement are within the current window
             if position >= start and position < end: #  and site_num!=0
