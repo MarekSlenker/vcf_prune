@@ -403,8 +403,8 @@ for vcf in vcf_list:
                 exec('newVCF' + str(rep+1) + '.close()')
 
     print '\n  sites for vcf: ', vcf_sites
-    print '  numb of sites, passed \"--missing\", \"--minf\", \"--minf\"... : ', passedSnps
-    print '  numb of sites, skipped due to  \"--missing\", \"--minf\", \"--minf\"... : ', skippedSnps, '\n'
+    print '  numb of sites, passed \"--missing\", \"--minf\", \"--maxf\"... : ', passedSnps
+    print '  numb of sites, skipped due to  \"--missing\", \"--minf\", \"--maxf\"... : ', skippedSnps, '\n'
 
 
 
