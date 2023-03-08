@@ -75,6 +75,7 @@ for (f in inputFiles) {
         if (is.na(begin)) {begin = pos; inside=pos}
         if ((pos - inside) > betweenLociDist) {
            end = inside 
+           if (begin == end) {end= end + 1}
            regions = c(regions,paste(begin, "-", end, sep = ""))
            begin = pos
            inside = pos
