@@ -3,7 +3,7 @@
 The initial version of this script was created by [Jordan Koch](https://github.com/jmkoch) and [Patrick Monnahan](https://github.com/pmonnahan). 
  
 ## Description
-`VCF_prune.py` is a python2 script that takes **multi-sample (any ploidy or a mix of ploidies) vcf files as input**, and outputs files that are formatted for use in **STRUCTURE**.  
+`VCF_prune.py` is a python2 script that takes **multi-sample (any ploidy or a mix of ploidies) vcf files as input**, and outputs **pruned VCF files** and files that are formatted for use in **STRUCTURE**.  
 
 This script works in two modes: 
 * by walking along the scafold of each input vcf file. A random SNP is selected from each window (passed filtering; width of window and distances between windows are defined by the user by the `–-winSize` and `--winDist`  arguments). Ideal for data retrieved from **whole-genome resequencing**,  where the SNPs are +- continuously spread over the scaffolds.
