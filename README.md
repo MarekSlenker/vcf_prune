@@ -1,5 +1,7 @@
 # VCF_prune v 1.1.0
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10522817.svg)](https://doi.org/10.5281/zenodo.10522817)  
+
 The initial version of this script was created by [Jordan Koch](https://github.com/jmkoch) and [Patrick Monnahan](https://github.com/pmonnahan). 
  
 ## Description
@@ -73,7 +75,13 @@ results will appear in test_data directory. The resulted structure files are rea
 
 &nbsp;  
 ### How to cite
-**Use the following formula:** ... vcf files were pruned using the vcf_prune.py script available at https://github.com/MarekSlenker/vcf_prune.  
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10522817.svg)](https://doi.org/10.5281/zenodo.10522817)  
+**Šlenker, M. 2024.** VCF_prune (1.1.0). Zenodo. https://doi.org/10.5281/zenodo.10522818
+
+
+
+
 
 &nbsp;  
 ### Other questions not covered here and reporting problems
