@@ -7,7 +7,7 @@ The initial version of this script was created by [Jordan Koch](https://github.c
 
 This script works in two modes: 
 * by walking along the scafold of each input vcf file. A random SNP is selected from each window (passed filtering; width of window and distances between windows are defined by the user by the `–-winSize` and `--winDist`  arguments). Ideal for data retrieved from **whole-genome resequencing**,  where the SNPs are +- continuously spread over the scaffolds.
-* select random SNP from each of provided loci (defined in '--regions' argument). This option is ideal for the SNPs produced by **RadSeq**, as those SNPs are not spread continuously, but grouped in RAD loci.  
+* select random SNP from each of provided loci (defined in '--regions' argument). This option is ideal for the SNPs produced by **RadSeq**, as those SNPs are not spread continuously, but grouped in RAD loci. See [identifiRadLoci.workflow](./identifiRadLoci.workflow)  
 
 SNPs are translated to integers and outputed in the STRUCTURE input data format.
 
