@@ -62,7 +62,7 @@ pdf()
 hist(distances, breaks = seq(0, max(distances)+10, 1), ylim = c(0, 80), xlim = c(0, 3000))
 dev.off()
 
-betweenLociDist = 1000  # decision is made according the histogram
+betweenLociDist = 1000  # decision is made according the histogram. If two regions were within a distance of 1000 base pairs or less, they were deemed a single RAD locus. However, if the distance between them exceeded 1000 base pairs, the regions were treated as distinct and unlinked RAD loci.
 
 
 for (f in inputFiles) {
