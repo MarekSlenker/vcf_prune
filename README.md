@@ -77,7 +77,7 @@ results will appear in test_data directory. The resulted structure files are rea
 ### How to cite
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10522817.svg)](https://doi.org/10.5281/zenodo.10522817)  
-**Šlenker, M. 2024.** VCF_prune (1.1.0). Zenodo. https://doi.org/10.5281/zenodo.10522818
+**Šlenker, M. 2024.** VCF_prune (1.1.0). Zenodo. https://doi.org/10.5281/zenodo.10522817
 
 
 
