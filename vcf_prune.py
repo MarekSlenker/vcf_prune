@@ -119,8 +119,11 @@ count = 0
 
 def TestSnpQuality(colsToProcess):
     info = colsToProcess[7].split(";")
-    AN = float(info[2].split("=")[1])
-    AC = float(info[0].split("=")[1])
+    for str in info:   
+        if "AN" in str:
+            AN = float(str.split("=")[1])
+        if "AC" in str:
+            AC = float(str.split("=")[1])
     currentAlleles = colsToProcess[9:]
     missingData = sum(map(lambda x : x[0] == '.', currentAlleles))
                                                                         # Missing_Data            # min. ALT allele frequency     # MAX. ALT allele frequency     # min. ALT allele frequency           # MAX. ALT allele frequency
